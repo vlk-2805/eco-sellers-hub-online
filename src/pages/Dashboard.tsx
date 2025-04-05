@@ -7,7 +7,8 @@ import CertificationCard from '@/components/dashboard/CertificationCard';
 import ProductFactorsCard from '@/components/dashboard/ProductFactorsCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ShoppingBag, TrendingUp, Users, Award, Plus } from 'lucide-react';
+import { ShoppingBag, TrendingUp, Award, Plus } from 'lucide-react';
+import PromoCodeGenerator from '@/components/dashboard/PromoCodeGenerator';
 
 const Dashboard: React.FC = () => {
   // Mock data
@@ -60,7 +61,7 @@ const Dashboard: React.FC = () => {
       </div>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <StatsCard
           title="Total Products"
           value="12"
@@ -79,12 +80,6 @@ const Dashboard: React.FC = () => {
           icon={<Award size={24} className="text-eco-600" />}
           trend={{ value: "2", positive: true }}
         />
-        <StatsCard
-          title="Loyal Customers"
-          value="768"
-          icon={<Users size={24} className="text-eco-600" />}
-          trend={{ value: "12%", positive: true }}
-        />
       </div>
       
       {/* Main Content */}
@@ -96,6 +91,11 @@ const Dashboard: React.FC = () => {
           {/* Product Factors */}
           <div className="mt-6">
             <ProductFactorsCard factors={productFactors} />
+          </div>
+          
+          {/* Promo Code Generator */}
+          <div className="mt-6">
+            <PromoCodeGenerator />
           </div>
         </div>
         

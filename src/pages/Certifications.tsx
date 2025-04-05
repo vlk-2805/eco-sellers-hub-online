@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Upload, X, FileText, Image } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +20,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -34,7 +40,8 @@ interface Certification {
   issueDate: string;
   expiryDate: string;
   description: string;
-  image?: string;
+  fileUrl?: string;
+  fileType?: string;
 }
 
 const certificationSchema = z.object({
@@ -75,6 +82,10 @@ const Certifications: React.FC = () => {
   ]);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<Certification | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof certificationSchema>>({
     resolver: zodResolver(certificationSchema),
@@ -87,7 +98,54 @@ const Certifications: React.FC = () => {
     },
   });
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Check file type
+      const isImage = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+      
+      if (!isImage && !isPdf) {
+        toast({
+          title: "Invalid file format",
+          description: "Please upload a PDF or image file",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setUploadedFile(file);
+      
+      // Create a preview URL
+      if (isImage) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFilePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // If it's a PDF, use a generic PDF icon
+        setFilePreview(null);
+      }
+    }
+  };
+
   const onSubmit = (data: z.infer<typeof certificationSchema>) => {
+    if (!uploadedFile) {
+      toast({
+        title: "File required",
+        description: "Please upload a certificate image or PDF file",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // In a real application, we would upload the file to a server
+    // For this demo, we'll create a fake URL
+    const fileUrl = URL.createObjectURL(uploadedFile);
+    const fileType = uploadedFile.type.startsWith('image/') ? 'image' : 'pdf';
+    
     const newCertification: Certification = {
       id: Date.now().toString(),
       name: data.name,
@@ -95,6 +153,8 @@ const Certifications: React.FC = () => {
       issueDate: data.issueDate,
       expiryDate: data.expiryDate || "",
       description: data.description || "",
+      fileUrl: fileUrl,
+      fileType: fileType
     };
     
     setCertifications([...certifications, newCertification]);
@@ -104,6 +164,20 @@ const Certifications: React.FC = () => {
     });
     setIsDialogOpen(false);
     form.reset();
+    setUploadedFile(null);
+    setFilePreview(null);
+  };
+
+  const viewCertificate = (cert: Certification) => {
+    setSelectedCertificate(cert);
+  };
+
+  const removeFile = () => {
+    setUploadedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -198,6 +272,63 @@ const Certifications: React.FC = () => {
                     </FormItem>
                   )}
                 />
+                
+                <div>
+                  <FormLabel>Upload Certificate</FormLabel>
+                  <div className="mt-1">
+                    <div className="border-2 border-dashed border-eco-200 rounded-md p-6 flex flex-col items-center">
+                      {!uploadedFile ? (
+                        <>
+                          <Upload className="h-10 w-10 text-eco-500 mb-2" />
+                          <p className="text-sm text-eco-700">Upload certification document (PDF) or image</p>
+                          <p className="text-xs text-eco-500">Click to browse or drag and drop</p>
+                          <Input 
+                            ref={fileInputRef}
+                            type="file" 
+                            className="mt-4"
+                            accept="image/*,.pdf"
+                            onChange={handleFileUpload}
+                          />
+                        </>
+                      ) : (
+                        <div className="w-full">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              {uploadedFile.type.startsWith('image/') ? (
+                                <Image size={20} className="text-eco-600" />
+                              ) : (
+                                <FileText size={20} className="text-eco-600" />
+                              )}
+                              <span className="text-sm truncate max-w-[200px]">
+                                {uploadedFile.name}
+                              </span>
+                            </div>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={removeFile}
+                            >
+                              <X size={16} />
+                            </Button>
+                          </div>
+                          
+                          {filePreview && (
+                            <div className="mt-2 border rounded overflow-hidden max-h-40">
+                              <img 
+                                src={filePreview} 
+                                alt="Preview" 
+                                className="object-contain h-full w-full"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-eco-600">Maximum file size: 5MB</p>
+                  </div>
+                </div>
+                
                 <DialogFooter>
                   <Button type="submit" className="bg-eco-500 hover:bg-eco-600">
                     Add Certification
@@ -224,6 +355,35 @@ const Certifications: React.FC = () => {
               </div>
             </div>
             <div className="p-5">
+              {cert.fileUrl && (
+                <div className="mb-4">
+                  {cert.fileType === 'image' ? (
+                    <div className="h-32 overflow-hidden rounded border border-eco-100">
+                      <img 
+                        src={cert.fileUrl} 
+                        alt={cert.name} 
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center bg-eco-50 rounded border border-eco-100">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex flex-col items-center cursor-pointer" onClick={() => viewCertificate(cert)}>
+                              <FileText size={40} className="text-eco-600" />
+                              <span className="text-sm text-eco-700 mt-2">View PDF</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Click to view certificate</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-eco-600">Issue Date:</span>
@@ -246,7 +406,12 @@ const Certifications: React.FC = () => {
                 </p>
               )}
               <div className="mt-4 flex gap-2">
-                <Button variant="outline" size="sm" className="text-eco-600 border-eco-200 hover:bg-eco-50 flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-eco-600 border-eco-200 hover:bg-eco-50 flex-1"
+                  onClick={() => viewCertificate(cert)}
+                >
                   View
                 </Button>
                 <Button variant="outline" size="sm" className="text-eco-600 border-eco-200 hover:bg-eco-50 flex-1">
@@ -257,6 +422,55 @@ const Certifications: React.FC = () => {
           </div>
         ))}
       </div>
+      
+      {/* Certificate Viewer Dialog */}
+      {selectedCertificate && (
+        <Dialog open={!!selectedCertificate} onOpenChange={() => setSelectedCertificate(null)}>
+          <DialogContent className="sm:max-w-[650px]">
+            <DialogHeader>
+              <DialogTitle>{selectedCertificate.name}</DialogTitle>
+              <DialogDescription>
+                Issued by {selectedCertificate.issuer} on {new Date(selectedCertificate.issueDate).toLocaleDateString()}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="my-4">
+              {selectedCertificate.fileUrl && selectedCertificate.fileType === 'image' ? (
+                <div className="max-h-96 overflow-auto border rounded">
+                  <img
+                    src={selectedCertificate.fileUrl}
+                    alt={selectedCertificate.name}
+                    className="w-full object-contain"
+                  />
+                </div>
+              ) : selectedCertificate.fileUrl && selectedCertificate.fileType === 'pdf' ? (
+                <div className="border rounded p-4 flex flex-col items-center">
+                  <FileText size={64} className="text-eco-600 mb-2" />
+                  <p className="text-sm text-eco-700 mb-2">PDF Document</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-eco-600 border-eco-200 hover:bg-eco-50"
+                    onClick={() => window.open(selectedCertificate.fileUrl, '_blank')}
+                  >
+                    Open PDF
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-center py-8 text-eco-600">No certificate file attached</p>
+              )}
+            </div>
+            {selectedCertificate.description && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-1 text-eco-900">Description</h4>
+                <p className="text-sm text-eco-700">{selectedCertificate.description}</p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedCertificate(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </DashboardLayout>
   );
 };

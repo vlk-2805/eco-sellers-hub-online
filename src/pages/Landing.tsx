@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const Landing: React.FC = () => {
                 <Button size="lg" className="bg-white text-eco-700 hover:bg-eco-50" asChild>
                   <Link to="/signup">Join for Free</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 hover:text-white" asChild>
                   <Link to="/login">Login</Link>
                 </Button>
               </div>
@@ -73,6 +72,24 @@ const Landing: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-20 px-4 bg-eco-600 text-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to grow your eco-friendly business?</h2>
+          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Join thousands of sustainable sellers who are making a bigger impact with EcoSellersHub
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" className="bg-white text-eco-700 hover:bg-eco-50" asChild>
+              <Link to="/signup">Get Started Today</Link>
+            </Button>
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 hover:text-white" asChild>
+              <Link to="/login">Login</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -140,7 +157,7 @@ const Landing: React.FC = () => {
             
             <div className="eco-card p-6">
               <div className="h-12 w-12 bg-eco-100 text-eco-600 rounded-lg flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 1 0 7.75"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
               <h3 className="text-xl font-semibold text-eco-900 mb-2">Customer Insights</h3>
               <p className="text-eco-700">
@@ -246,24 +263,6 @@ const Landing: React.FC = () => {
                 customers. After making changes, our reviews improved dramatically!"
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-eco-600 text-white">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to grow your eco-friendly business?</h2>
-          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of sustainable sellers who are making a bigger impact with EcoSellersHub
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="bg-white text-eco-700 hover:bg-eco-50" asChild>
-              <Link to="/signup">Get Started Today</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-              <Link to="/login">Login</Link>
-            </Button>
           </div>
         </div>
       </section>
